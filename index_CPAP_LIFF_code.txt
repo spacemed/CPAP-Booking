@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>จองคิวการทำความสะอาดเครื่อง CPAP</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans Thai", sans-serif;
+      background: linear-gradient(180deg, #dff6ff, #eefaff);
+      color: #444;
+    }
+
+    .page-container {
+      min-height: 100vh;
+      padding: 25px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 24px;
+      padding: 38px;
+      box-shadow: 0 8px 30px rgba(0, 130, 180, 0.15);
+    }
+
+    .form-title {
+      color: #008bb5;
+      text-align: center;
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .form-subtitle {
+      color: #777;
+      text-align: center;
+      font-size: 19px;
+      margin-bottom: 30px;
+    }
+
+    .form-section {
+      margin-bottom: 23px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 21px;
+      font-weight: 600;
+      margin-bottom: 9px;
+      color: #555;
+    }
+
+    .required {
+      color: #e53935;
+    }
+
+    .form-control,
+    .form-select {
+      width: 100%;
+      min-height: 60px;
+      border: 2px solid #c9e7ef;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 20px;
+      padding: 12px 15px;
+      color: #444;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #00a6d6;
+      box-shadow: 0 0 0 0.2rem rgba(0, 166, 214, 0.15);
+    }
+
+    textarea.form-control {
+      min-height: 125px;
+      resize: vertical;
+    }
+
+    .date-wrapper {
+      position: relative;
+    }
+
+    #bookingDate {
+      cursor: pointer;
+      background: #fff;
+      padding-right: 52px;
+    }
+
+    .help-text {
+      color: #777;
+      font-size: 16px;
+      margin-top: 7px;
+    }
+
+    /* สถานะคิว: ไม่แสดงจำนวนคิว */
+    .queue-status {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 15px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .queue-status.available {
+      display: block;
+      color: #176b38;
+      background: #e7f7ed;
+      border: 1px solid #b5e3c4;
+    }
+
+    .queue-status.full {
+      display: block;
+      color: #a32020;
+      background: #fff0f0;
+      border: 1px solid #f0c1c1;
+    }
+
+    .queue-status.checking {
+      display: block;
+      color: #555;
+      background: #f1f5f8;
+      border: 1px solid #d7e0e5;
+    }
+
+    .queue-status.error {
+      display: block;
+      color: #8a5200;
+      background: #fff7e6;
+      border: 1px solid #f0d8a4;
+    }
+
+    .btn-submit {
+      width: 100%;
+      min-height: 65px;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 14px;
+      background: #009dcc;
+      color: #fff;
+      font-family: inherit;
+      font-size: 23px;
+      font-weight: 600;
+    }
+
+    .btn-submit:hover {
+      background: #007fa5;
+      color: #fff;
+    }
+
+    .btn-submit:disabled {
+      background: #9ccbd6;
+      cursor: not-allowed;
+    }
+
+    .flatpickr-calendar {
+      font-family: "Noto Sans Thai", sans-serif;
+      border-radius: 14px;
+      font-size: 16px;
+    }
+
+    .flatpickr-day {
+      height: 40px;
+      line-height: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .page-container {
+        padding: 10px;
+        align-items: flex-start;
+      }
+
+      .form-card {
+        margin-top: 8px;
+        padding: 24px 17px;
+        border-radius: 18px;
+      }
+
+      .form-title {
+        font-size: 28px;
+      }
+
+      .form-subtitle {
+        font-size: 17px;
+        margin-bottom: 25px;
+      }
+
+      .form-label {
+        font-size: 20px;
+      }
+
+      .form-control,
+      .form-select {
+        min-height: 60px;
+        font-size: 19px;
+      }
+
+      .btn-submit {
+        min-height: 65px;
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page-container">
+    <section class="form-card">
+
+      <h1 class="form-title">
+        จองคิวการทำความสะอาดเครื่อง CPAP
+      </h1>
+
+      <p class="form-subtitle">
+        กรุณากรอกข้อมูลเพื่อจองคิวเข้ารับบริการ
+      </p>
+      <div id="lineLoginStatus" class="help-text text-center mb-3" role="status" aria-live="polite">
+        กำลังเชื่อมต่อ LINE...
+      </div>
+
+      <form id="bookingForm">
+
+        <div class="row">
+          <div class="col-md-6 form-section">
+            <label class="form-label" for="firstName">
+              ชื่อ <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="firstName"
+              placeholder="กรุณากรอกชื่อ"
+              autocomplete="given-name"
+              required>
+          </div>
+
+          <div class="col-md-6 form-section">
+            <label class="form-label" for="lastName">
+              นามสกุล <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="lastName"
+              placeholder="กรุณากรอกนามสกุล"
+              autocomplete="family-name"
+              required>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="phone">
+            เบอร์โทรศัพท์ <span class="required">*</span>
+          </label>
+          <input
+            type="tel"
+            class="form-control"
+            id="phone"
+            placeholder="กรุณากรอกเบอร์โทรศัพท์ 10 หลัก"
+            inputmode="numeric"
+            maxlength="10"
+            autocomplete="tel"
+            required>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="cpapBrand">
+            ยี่ห้อเครื่อง CPAP <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="cpapBrand"
+            placeholder="กรุณาระบุยี่ห้อเครื่อง CPAP"
+            required>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="bookingDate">
+            วันที่ต้องการเข้ารับบริการ <span class="required">*</span>
+          </label>
+
+          <div class="date-wrapper">
+            <input
+              type="text"
+              class="form-control"
+              id="bookingDate"
+              placeholder="กรุณาเลือกวันที่จากปฏิทิน"
+              readonly
+              required>
+          </div>
+
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="bookingTime">
+            เวลาที่ต้องการเข้ารับบริการ <span class="required">*</span>
+          </label>
+
+          <select class="form-select" id="bookingTime" required>
+            <option value="">กรุณาเลือกเวลา</option>
+            <option value="09:00">09:00 น.</option>
+            <option value="10:00">10:00 น.</option>
+            <option value="11:00">11:00 น.</option>
+            <option value="13:00">13:00 น.</option>
+            <option value="14:00">14:00 น.</option>
+            <option value="15:00">15:00 น.</option>
+          </select>
+
+          <div id="queueStatus" class="queue-status" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="note">
+            หมายเหตุ
+          </label>
+          <textarea
+            class="form-control"
+            id="note"
+            placeholder="หากเครื่องมีอาการผิดปกติหรือมีรายละเอียดเพิ่มเติม กรุณาระบุ"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn" disabled>
+          ยืนยันการจองคิว
+        </button>
+
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("bookingForm");
+    const dateInput = document.getElementById("bookingDate");
+    const timeInput = document.getElementById("bookingTime");
+    const statusBox = document.getElementById("queueStatus");
+    const submitBtn = document.getElementById("submitBtn");
+    const lineLoginStatus = document.getElementById("lineLoginStatus");
+
+    // LIFF ID ของระบบจองคิว CPAP
+    const LIFF_ID = "2012251258-lkZs5XFV";
+    let lineIdToken = "";
+    let liffReady = false;
+
+    let datePicker = null;
+    let checkSequence = 0;
+    let checkTimer = null;
+    let isChecking = false;
+    let isSubmitting = false;
+    let lastCheckKey = "";
+    let lastCheckAvailable = null;
+
+    // -------------------------------------------------
+    // เริ่มต้น LIFF และเตรียม ID Token สำหรับยืนยันตัวตน
+    // ใน LINE Developers Console ต้องเปิด scope: openid
+    // -------------------------------------------------
+    async function initializeLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isLoggedIn() && !liff.isInClient()) {
+          lineLoginStatus.textContent = "กำลังเปิดหน้าเข้าสู่ระบบ LINE...";
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        lineIdToken = liff.getIDToken() || "";
+        if (!lineIdToken) {
+          throw new Error("ไม่พบ ID Token กรุณาตรวจสอบว่าเปิด scope openid ใน LIFF แล้ว");
+        }
+
+        liffReady = true;
+        submitBtn.disabled = false;
+        lineLoginStatus.textContent = "เชื่อมต่อ LINE สำเร็จ สามารถจองคิวได้";
+      } catch (error) {
+        console.error("LIFF initialization error:", error);
+        liffReady = false;
+        submitBtn.disabled = true;
+        lineLoginStatus.textContent = "เชื่อมต่อ LINE ไม่สำเร็จ กรุณาเปิดแบบฟอร์มผ่าน LIFF และตรวจสอบการตั้งค่า openid";
+        Swal.fire({
+          icon: "error",
+          title: "เชื่อมต่อ LINE ไม่สำเร็จ",
+          text: "กรุณาเปิดแบบฟอร์มจาก LIFF ใน LINE และตรวจสอบว่า LIFF เปิด scope openid แล้ว",
+          confirmButtonText: "ตกลง"
+        });
+      }
+    }
+
+    initializeLiff();
+
+    // -------------------------------------------------
+    // แสดงวันที่เป็น พ.ศ. เช่น 6 ตุลาคม 2569
+    // -------------------------------------------------
+
+    function formatThaiDate(date) {
+      const months = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+        "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+        "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+      ];
+
+      return (
+        date.getDate() + " " +
+        months[date.getMonth()] + " " +
+        (date.getFullYear() + 543)
+      );
+    }
+
+    // -------------------------------------------------
+    // แสดงสถานะโดยไม่เปิดเผยจำนวนคิว
+    // -------------------------------------------------
+
+    function showStatus(type, message) {
+      statusBox.className = "queue-status " + type;
+      statusBox.textContent = message;
+    }
+
+    function clearStatus() {
+      statusBox.className = "queue-status";
+      statusBox.textContent = "";
+    }
+
+    function selectedKey() {
+      return dateInput.value + "|" + timeInput.value;
+    }
+
+    // -------------------------------------------------
+    // เริ่มต้นปฏิทิน
+    // -------------------------------------------------
+
+    document.addEventListener("DOMContentLoaded", function () {
+      datePicker = flatpickr(dateInput, {
+        locale: "th",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "j F Y",
+        minDate: "today",
+        disable: [
+          function (date) {
+            return date.getDay() === 0 || date.getDay() === 6;
+          }
+        ],
+
+        onReady: function (selectedDates, dateStr, instance) {
+          if (instance.altInput && selectedDates.length) {
+            instance.altInput.value = formatThaiDate(selectedDates[0]);
+          }
+
+          if (instance.altInput) {
+            instance.altInput.placeholder = "กรุณาเลือกวันที่จากปฏิทิน";
+            instance.altInput.readOnly = true;
+            instance.altInput.classList.add("form-control");
+          }
+        },
+
+        onChange: function (selectedDates, dateStr, instance) {
+          if (instance.altInput && selectedDates.length) {
+            instance.altInput.value = formatThaiDate(selectedDates[0]);
+          }
+
+          lastCheckKey = "";
+          lastCheckAvailable = null;
+          checkQueueAvailability();
+        }
+      });
+    });
+
+    // -------------------------------------------------
+    // ตรวจคิวเมื่อเลือกวันและเวลา
+    // หน่วงเพียงเล็กน้อยเพื่อรวมการเปลี่ยนแปลงที่ติดกัน
+    // -------------------------------------------------
+
+    function checkQueueAvailability() {
+      clearTimeout(checkTimer);
+
+      const bookingDate = dateInput.value;
+      const bookingTime = timeInput.value;
+
+      if (!bookingDate || !bookingTime) {
+        checkSequence++;
+        isChecking = false;
+        lastCheckKey = "";
+        lastCheckAvailable = null;
+        clearStatus();
+        return;
+      }
+
+      const key = selectedKey();
+
+      // ถ้าคู่วันและเวลานี้ตรวจเสร็จแล้ว ใช้ผลเดิมได้
+      if (key === lastCheckKey && lastCheckAvailable !== null) {
+        showStatus(
+          lastCheckAvailable ? "available" : "full",
+          lastCheckAvailable
+            ? "✓ ช่วงเวลานี้ยังว่าง สามารถจองได้"
+            : "✕ ช่วงเวลานี้คิวเต็มแล้ว กรุณาเลือกเวลาอื่น"
+        );
+        return;
+      }
+
+      const sequence = ++checkSequence;
+      isChecking = true;
+
+      showStatus("checking", "กำลังตรวจสอบคิว...");
+
+      checkTimer = setTimeout(function () {
+        google.script.run
+          .withSuccessHandler(function (result) {
+            // ทิ้งผลลัพธ์เก่าถ้าผู้ใช้เปลี่ยนวันหรือเวลาไปแล้ว
+            if (sequence !== checkSequence || key !== selectedKey()) {
+              return;
+            }
+
+            isChecking = false;
+            lastCheckKey = key;
+
+            if (!result || !result.success) {
+              lastCheckAvailable = null;
+              showStatus(
+                "error",
+                result && result.message
+                  ? result.message
+                  : "ตรวจสอบคิวไม่สำเร็จ กรุณาลองใหม่"
+              );
+              return;
+            }
+
+            lastCheckAvailable = result.available === true;
+
+            showStatus(
+              lastCheckAvailable ? "available" : "full",
+              lastCheckAvailable
+                ? "✓ ช่วงเวลานี้ยังว่าง สามารถจองได้"
+                : "✕ ช่วงเวลานี้คิวเต็มแล้ว กรุณาเลือกเวลาอื่น"
+            );
+          })
+          .withFailureHandler(function (error) {
+            if (sequence !== checkSequence) {
+              return;
+            }
+
+            isChecking = false;
+            lastCheckAvailable = null;
+
+            console.error(error);
+
+            showStatus(
+              "error",
+              "ตรวจสอบคิวไม่สำเร็จ กรุณาลองอีกครั้ง"
+            );
+          })
+          .checkQueue(bookingDate, bookingTime);
+      }, 100);
+    }
+
+    timeInput.addEventListener("change", function () {
+      lastCheckKey = "";
+      lastCheckAvailable = null;
+      checkQueueAvailability();
+    });
+
+    // -------------------------------------------------
+    // รับเฉพาะตัวเลขในช่องเบอร์โทร
+    // -------------------------------------------------
+
+    document.getElementById("phone").addEventListener("input", function () {
+      this.value = this.value.replace(/\D/g, "").slice(0, 10);
+    });
+
+    // -------------------------------------------------
+    // ส่งแบบฟอร์ม
+    // -------------------------------------------------
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      if (isSubmitting) {
+        return;
+      }
+
+      if (!liffReady || !lineIdToken) {
+        Swal.fire({
+          icon: "warning",
+          title: "ยังเชื่อมต่อ LINE ไม่สำเร็จ",
+          text: "กรุณาเปิดแบบฟอร์มผ่าน LIFF แล้วลองใหม่อีกครั้ง",
+          confirmButtonText: "ตกลง"
+        });
+        return;
+      }
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName = document.getElementById("lastName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const cpapBrand = document.getElementById("cpapBrand").value.trim();
+      const bookingDate = dateInput.value;
+      const bookingTime = timeInput.value;
+      const note = document.getElementById("note").value.trim();
+
+      if (!firstName || !lastName || !phone || !cpapBrand || !bookingDate || !bookingTime) {
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณากรอกข้อมูลให้ครบ",
+          confirmButtonText: "ตกลง"
+        });
+        return;
+      }
+
+      if (!/^0\d{9}$/.test(phone)) {
+        Swal.fire({
+          icon: "warning",
+          title: "เบอร์โทรศัพท์ไม่ถูกต้อง",
+          text: "กรุณากรอกเบอร์โทรศัพท์ 10 หลัก",
+          confirmButtonText: "ตกลง"
+        });
+        return;
+      }
+
+      // ถ้ากำลังตรวจคิวอยู่ อย่าเพิ่งส่งข้อมูล
+      if (isChecking) {
+        Swal.fire({
+          icon: "info",
+          title: "กำลังตรวจสอบคิว",
+          text: "กรุณารอสักครู่แล้วกดยืนยันอีกครั้ง",
+          confirmButtonText: "ตกลง"
+        });
+        return;
+      }
+
+      // ถ้าผลตรวจล่าสุดบอกว่าเต็ม ให้หยุดทันที
+      if (selectedKey() === lastCheckKey && lastCheckAvailable === false) {
+        Swal.fire({
+          icon: "warning",
+          title: "คิวเต็มแล้ว",
+          text: "ช่วงเวลานี้มีผู้จองครบแล้ว กรุณาเลือกเวลาอื่น",
+          confirmButtonText: "ตกลง"
+        });
+        return;
+      }
+
+      isSubmitting = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "กำลังบันทึกข้อมูล...";
+
+      const formData = {
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone,
+        cpapBrand: cpapBrand,
+        bookingDate: bookingDate,
+        bookingTime: bookingTime,
+        note: note,
+        idToken: lineIdToken
+      };
+
+      google.script.run
+        .withSuccessHandler(function (result) {
+          isSubmitting = false;
+          submitBtn.disabled = !liffReady;
+          submitBtn.textContent = "ยืนยันการจองคิว";
+
+          if (!result || !result.success) {
+            lastCheckKey = "";
+            lastCheckAvailable = null;
+
+            Swal.fire({
+              icon: "warning",
+              title: "ไม่สามารถจองคิวได้",
+              text: result && result.message
+                ? result.message
+                : "กรุณาตรวจสอบวันและเวลาอีกครั้ง",
+              confirmButtonText: "ตกลง"
+            }).then(function () {
+              checkQueueAvailability();
+            });
+
+            return;
+          }
+
+          const parts = bookingDate.split("-").map(Number);
+          const dateObject = new Date(parts[0], parts[1] - 1, parts[2]);
+
+          Swal.fire({
+            icon: "success",
+            title: "จองคิวสำเร็จ",
+            html:
+              "ระบบบันทึกข้อมูลการจองเรียบร้อยแล้ว<br><br>" +
+              "<b>วันที่:</b> " + formatThaiDate(dateObject) + "<br>" +
+              "<b>เวลา:</b> " + bookingTime + " น.",
+            confirmButtonText: "ตกลง"
+          }).then(function () {
+            form.reset();
+
+            if (datePicker) {
+              datePicker.clear();
+            }
+
+            lastCheckKey = "";
+            lastCheckAvailable = null;
+            isChecking = false;
+            clearStatus();
+          });
+        })
+        .withFailureHandler(function (error) {
+          console.error(error);
+
+          isSubmitting = false;
+          submitBtn.disabled = !liffReady;
+          submitBtn.textContent = "ยืนยันการจองคิว";
+
+          Swal.fire({
+            icon: "error",
+            title: "เกิดข้อผิดพลาด",
+            text: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง",
+            confirmButtonText: "ตกลง"
+          });
+        })
+        .submitBooking(formData);
+    });
+  </script>
+</body>
+</html>
