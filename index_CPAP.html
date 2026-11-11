@@ -250,9 +250,13 @@
   </main>
 
   <script>
-	//====================================================
-        const LIFF_ID = "2012251258-lkZs5XFV";
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxfzLfr70cJyD0UA6vDfcC0HfmwQK_mwY72be7A2EFCIx5o5Ly5Iypqc7506k86ZwZAMw/exec";
+    // =====================================================
+    // ตั้งค่า (แก้ 2 ค่านี้)
+    // =====================================================
+    const LIFF_ID = "2012251258-lkZs5XFV";
+
+    // วาง URL /exec ที่ได้จากการ Deploy Web app ของ Google Apps Script
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxfzLfr70cJyD0UA6vDfcC0HfmwQK_mwY72be7A2EFCIx5o5Ly5Iypqc7506k86ZwZAMw/exec";
 
     // =====================================================
     // เรียก GAS ผ่าน fetch
@@ -397,8 +401,9 @@
     // -------------------------------------------------
     // เริ่มต้นปฏิทิน
     // -------------------------------------------------
-    document.addEventListener("DOMContentLoaded", function () {
+    function initCalendar() {
       datePicker = flatpickr(dateInput, {
+        disableMobile: true,
         locale: "th",
         dateFormat: "Y-m-d",
         altInput: true,
@@ -432,7 +437,13 @@
           checkQueueAvailability();
         }
       });
-    });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initCalendar);
+    } else {
+      initCalendar();
+    }
 
     // -------------------------------------------------
     // ตรวจคิวเมื่อเลือกวันและเวลา
